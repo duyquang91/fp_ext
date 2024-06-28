@@ -6,6 +6,7 @@ import { GetUserSchema, UserSchema } from '@/api/user/userModel';
 import { userService } from '@/api/user/userService';
 import { createApiResponse } from '@/api-docs/openAPIResponseBuilders';
 import { handleServiceResponse, validateRequest } from '@/common/utils/httpHandlers';
+import { email } from 'envalid';
 
 export const userRegistry = new OpenAPIRegistry();
 
@@ -34,9 +35,8 @@ export const userRouter: Router = (() => {
     responses: createApiResponse(UserSchema, 'Success'),
   });
 
-  router.get('/:id', validateRequest(GetUserSchema), async (req: Request, res: Response) => {
-    const id = parseInt(req.params.id as string, 10);
-    const serviceResponse = await userService.findById(id);
+  router.get('/:email', validateRequest(GetUserSchema), async (req: Request, res: Response) => {
+    const serviceResponse = await userService.findById(req.params.email);
     handleServiceResponse(serviceResponse, res);
   });
 

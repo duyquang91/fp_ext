@@ -15,22 +15,22 @@ export const userService = {
       }
       return new ServiceResponse<User[]>(ResponseStatus.Success, 'Users found', users, StatusCodes.OK);
     } catch (ex) {
-      const errorMessage = `Error finding all users: $${(ex as Error).message}`;
+      const errorMessage = `Error finding all users: ${ex}`;
       logger.error(errorMessage);
       return new ServiceResponse(ResponseStatus.Failed, errorMessage, null, StatusCodes.INTERNAL_SERVER_ERROR);
     }
   },
 
   // Retrieves a single user by their ID
-  findById: async (id: number): Promise<ServiceResponse<User | null>> => {
+  findById: async (email: string): Promise<ServiceResponse<User | null>> => {
     try {
-      const user = await userRepository.findByIdAsync(id);
+      const user = await userRepository.findByIdAsync(email);
       if (!user) {
         return new ServiceResponse(ResponseStatus.Failed, 'User not found', null, StatusCodes.NOT_FOUND);
       }
       return new ServiceResponse<User>(ResponseStatus.Success, 'User found', user, StatusCodes.OK);
     } catch (ex) {
-      const errorMessage = `Error finding user with id ${id}:, ${(ex as Error).message}`;
+      const errorMessage = `Error finding user with id ${email}:, ${(ex as Error).message}`;
       logger.error(errorMessage);
       return new ServiceResponse(ResponseStatus.Failed, errorMessage, null, StatusCodes.INTERNAL_SERVER_ERROR);
     }
