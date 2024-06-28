@@ -4,7 +4,7 @@ import { logger } from '@/server';
 
 export const userRepository = {
   findAllAsync: async (): Promise<User[]> => {
-    return await mySQLQuery('SELECT * FROM users')
+    return await mySQLQuery('SELECT * FROM users') ?? []
   },
 
   findByEmail: async (email: string): Promise<User | null> => {

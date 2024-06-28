@@ -10,7 +10,7 @@ export const userService = {
   findAll: async (): Promise<ServiceResponse<User[] | null>> => {
     try {
       const users = await userRepository.findAllAsync();
-      if (!users || users.length == 0) {
+      if (users.length == 0) {
         return new ServiceResponse(ResponseStatus.Failed, 'No Users found', null, StatusCodes.NOT_FOUND);
       }
       return new ServiceResponse<User[]>(ResponseStatus.Success, 'Users found', users, StatusCodes.OK);
