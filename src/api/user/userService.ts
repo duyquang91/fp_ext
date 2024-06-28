@@ -1,6 +1,6 @@
 import { StatusCodes } from 'http-status-codes';
 
-import { User } from '@/api/user/userModel';
+import { User, UserSchema } from '@/api/user/userModel';
 import { userRepository } from '@/api/user/userRepository';
 import { ResponseStatus, ServiceResponse } from '@/common/models/serviceResponse';
 import { logger } from '@/server';
@@ -10,7 +10,7 @@ export const userService = {
   findAll: async (): Promise<ServiceResponse<User[] | null>> => {
     try {
       const users = await userRepository.findAllAsync();
-      if (!users) {
+      if (!users || users.length == 0) {
         return new ServiceResponse(ResponseStatus.Failed, 'No Users found', null, StatusCodes.NOT_FOUND);
       }
       return new ServiceResponse<User[]>(ResponseStatus.Success, 'Users found', users, StatusCodes.OK);
@@ -22,15 +22,16 @@ export const userService = {
   },
 
   // Retrieves a single user by their ID
-  findById: async (email: string): Promise<ServiceResponse<User | null>> => {
+  findByEmail: async (email: string): Promise<ServiceResponse<User | null>> => {
     try {
-      const user = await userRepository.findByIdAsync(email);
+      const user = await userRepository.findByEmail(email);
       if (!user) {
         return new ServiceResponse(ResponseStatus.Failed, 'User not found', null, StatusCodes.NOT_FOUND);
       }
+      logger.info(user)
       return new ServiceResponse<User>(ResponseStatus.Success, 'User found', user, StatusCodes.OK);
     } catch (ex) {
-      const errorMessage = `Error finding user with id ${email}:, ${(ex as Error).message}`;
+      const errorMessage = `Error finding user with email ${email}: ${(ex as Error).message}`;
       logger.error(errorMessage);
       return new ServiceResponse(ResponseStatus.Failed, errorMessage, null, StatusCodes.INTERNAL_SERVER_ERROR);
     }

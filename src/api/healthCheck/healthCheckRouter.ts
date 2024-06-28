@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { createApiResponse } from '@/api-docs/openAPIResponseBuilders';
 import { ResponseStatus, ServiceResponse } from '@/common/models/serviceResponse';
 import { handleServiceResponse } from '@/common/utils/httpHandlers';
+import { mySQLQuery, testConnection } from '@/common/middleware/sqlQuery';
 
 export const healthCheckRegistry = new OpenAPIRegistry();
 
@@ -14,13 +15,14 @@ export const healthCheckRouter: Router = (() => {
 
   healthCheckRegistry.registerPath({
     method: 'get',
-    path: '/health-check',
+    path: '/fp/health-check',
     tags: ['Health Check'],
     responses: createApiResponse(z.null(), 'Success'),
   });
 
-  router.get('/', (_req: Request, res: Response) => {
-    const serviceResponse = new ServiceResponse(ResponseStatus.Success, 'Service is healthy', null, StatusCodes.OK);
+  router.get('/', async (_req: Request, res: Response) => {
+    const dbStatus = await testConnection()
+    const serviceResponse = new ServiceResponse(ResponseStatus.Success, `Service is running and ${dbStatus}`, null, StatusCodes.OK);
     handleServiceResponse(serviceResponse, res);
   });
 

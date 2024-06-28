@@ -68,10 +68,10 @@ describe('userService', () => {
       // Arrange
       const testId = 1;
       const mockUser = mockUsers.find((user) => user.id === testId);
-      (userRepository.findByIdAsync as Mock).mockReturnValue(mockUser);
+      (userRepository.findByEmail as Mock).mockReturnValue(mockUser);
 
       // Act
-      const result = await userService.findById(testId);
+      const result = await userService.findByEmail(testId);
 
       // Assert
       expect(result.statusCode).toEqual(StatusCodes.OK);
@@ -83,10 +83,10 @@ describe('userService', () => {
     it('handles errors for findByIdAsync', async () => {
       // Arrange
       const testId = 1;
-      (userRepository.findByIdAsync as Mock).mockRejectedValue(new Error('Database error'));
+      (userRepository.findByEmail as Mock).mockRejectedValue(new Error('Database error'));
 
       // Act
-      const result = await userService.findById(testId);
+      const result = await userService.findByEmail(testId);
 
       // Assert
       expect(result.statusCode).toEqual(StatusCodes.INTERNAL_SERVER_ERROR);
@@ -98,10 +98,10 @@ describe('userService', () => {
     it('returns a not found error for non-existent ID', async () => {
       // Arrange
       const testId = 1;
-      (userRepository.findByIdAsync as Mock).mockReturnValue(null);
+      (userRepository.findByEmail as Mock).mockReturnValue(null);
 
       // Act
-      const result = await userService.findById(testId);
+      const result = await userService.findByEmail(testId);
 
       // Assert
       expect(result.statusCode).toEqual(StatusCodes.NOT_FOUND);

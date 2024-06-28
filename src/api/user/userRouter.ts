@@ -1,12 +1,11 @@
 import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
-import express, { Request, Response, Router } from 'express';
+import express, { Request, Response, Router, query } from 'express';
 import { z } from 'zod';
 
 import { GetUserSchema, UserSchema } from '@/api/user/userModel';
 import { userService } from '@/api/user/userService';
 import { createApiResponse } from '@/api-docs/openAPIResponseBuilders';
 import { handleServiceResponse, validateRequest } from '@/common/utils/httpHandlers';
-import { email } from 'envalid';
 
 export const userRegistry = new OpenAPIRegistry();
 
@@ -17,27 +16,20 @@ export const userRouter: Router = (() => {
 
   userRegistry.registerPath({
     method: 'get',
-    path: '/users',
+    path: '/fp/users',
     tags: ['User'],
-    responses: createApiResponse(z.array(UserSchema), 'Success'),
-  });
-
-  router.get('/', async (_req: Request, res: Response) => {
-    const serviceResponse = await userService.findAll();
-    handleServiceResponse(serviceResponse, res);
-  });
-
-  userRegistry.registerPath({
-    method: 'get',
-    path: '/users/{id}',
-    tags: ['User'],
-    request: { params: GetUserSchema.shape.params },
+    request: { query: GetUserSchema.shape.query },
     responses: createApiResponse(UserSchema, 'Success'),
   });
 
-  router.get('/:email', validateRequest(GetUserSchema), async (req: Request, res: Response) => {
-    const serviceResponse = await userService.findById(req.params.email);
-    handleServiceResponse(serviceResponse, res);
+  router.get('/', validateRequest(GetUserSchema), async (req: Request<{}, {}, {}, {email?:string}>, res: Response) => {
+    if (req.query.email) {
+      const serviceResponse = await userService.findByEmail(req.query.email);
+      handleServiceResponse(serviceResponse, res);
+    } else {
+      const serviceResponse = await userService.findAll();
+      handleServiceResponse(serviceResponse, res)
+    }
   });
 
   return router;
