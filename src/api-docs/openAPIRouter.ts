@@ -12,7 +12,7 @@ export const openAPIRouter: Router = (() => {
     res.send(openAPIDocument)
   })
 
-  router.use('/fp/swagger', swaggerUi.serve, swaggerUi.setup(openAPIDocument))
+  router.use('/', swaggerUi.serve, swaggerUi.setup(openAPIDocument))
 
   return router
 })()

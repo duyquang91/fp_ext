@@ -30,7 +30,7 @@ app.use('/fp/health-check', healthCheckRouter)
 app.use('/fp/users', userRouter)
 
 // Swagger UI
-app.use(openAPIRouter)
+app.use('/fp/swagger', openAPIRouter)
 
 // Error handlers
 app.use(errorHandler())
