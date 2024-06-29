@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod'
 
 export const commonValidations = {
   id: z
@@ -7,4 +7,4 @@ export const commonValidations = {
     .transform(Number)
     .refine((num) => num > 0, 'ID must be a positive number'),
   // ... other common validations
-};
+}

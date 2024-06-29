@@ -1,11 +1,11 @@
-import { OpenApiGeneratorV3, OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
+import { OpenApiGeneratorV3, OpenAPIRegistry } from '@asteasolutions/zod-to-openapi'
 
-import { healthCheckRegistry } from '@/api/healthCheck/healthCheckRouter';
-import { userRegistry } from '@/api/user/userRouter';
+import { healthCheckRegistry } from '@/api/healthCheck/healthCheckRouter'
+import { userRegistry } from '@/api/user/userRouter'
 
 export function generateOpenAPIDocument() {
-  const registry = new OpenAPIRegistry([healthCheckRegistry, userRegistry]);
-  const generator = new OpenApiGeneratorV3(registry.definitions);
+  const registry = new OpenAPIRegistry([healthCheckRegistry, userRegistry])
+  const generator = new OpenApiGeneratorV3(registry.definitions)
 
   return generator.generateDocument({
     openapi: '3.0.0',
@@ -17,5 +17,5 @@ export function generateOpenAPIDocument() {
       description: 'View the raw OpenAPI Specification in JSON format',
       url: '/swagger.json',
     },
-  });
+  })
 }
