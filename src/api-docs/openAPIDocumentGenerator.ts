@@ -10,12 +10,9 @@ export function generateOpenAPIDocument() {
   return generator.generateDocument({
     openapi: '3.0.0',
     info: {
-      version: '1.0.0',
-      title: 'Swagger API',
-    },
-    externalDocs: {
-      description: 'View the raw OpenAPI Specification in JSON format',
-      url: '/swagger.json',
-    },
+      version: 'beta',
+      title: '🐼 Food Panda Killer APIs',
+      description: "This service is using by OKX's staffs internally. DO NOT public!!!",
+    }
   })
 }
