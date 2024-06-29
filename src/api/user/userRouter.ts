@@ -1,11 +1,17 @@
 import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi'
-import express, { Request, Response, Router, query } from 'express'
-import { z } from 'zod'
-
-import { GetUserSchema, UserSchema } from '@/api/user/userModel'
+import express, { Request, Response, Router } from 'express'
+import {
+  GetUserSchema,
+  InitUser,
+  PostInitUserSchema,
+  UpdateCookieSchema,
+  UpdateUserCookieSchema,
+  UserSchema,
+} from '@/api/user/userModel'
 import { userService } from '@/api/user/userService'
 import { createApiResponse } from '@/api-docs/openAPIResponseBuilders'
 import { handleServiceResponse, validateRequest } from '@/common/utils/httpHandlers'
+import { logger } from '@/server'
 
 export const userRegistry = new OpenAPIRegistry()
 
@@ -36,6 +42,42 @@ export const userRouter: Router = (() => {
 
   router.get('/:id', validateRequest(GetUserSchema), async (req: Request, res: Response) => {
     const serviceResponse = await userService.findByUserId(req.params.id)
+    handleServiceResponse(serviceResponse, res)
+  })
+
+  userRegistry.registerPath({
+    method: 'post',
+    path: '/fp/users/create',
+    tags: ['User'],
+    request: {
+      body: {
+        description: 'Backend will parse the userId & authToken then create the user together',
+        content: { 'application/json': { schema: PostInitUserSchema.shape.body } },
+      },
+    },
+    responses: createApiResponse(UserSchema, 'Success'),
+  })
+
+  router.post('/create', async (req: Request, res: Response) => {
+    const serviceResponse = await userService.createUser(req.body)
+    handleServiceResponse(serviceResponse, res)
+  })
+
+  userRegistry.registerPath({
+    method: 'put',
+    path: '/fp/users/update',
+    tags: ['User'],
+    request: {
+      body: {
+        description: 'Backend will parse the userId & authToken then update the user together',
+        content: { 'application/json': { schema: UpdateUserCookieSchema.shape.body } },
+      },
+    },
+    responses: createApiResponse(UserSchema, 'Success'),
+  })
+
+  router.put('/update', async (req: Request, res: Response) => {
+    const serviceResponse = await userService.updateUserCookie(req.body['cookie'])
     handleServiceResponse(serviceResponse, res)
   })
 

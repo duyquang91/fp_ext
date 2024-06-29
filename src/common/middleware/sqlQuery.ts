@@ -1,14 +1,7 @@
 import { logger } from '@/server'
-import { Collection, MongoClient } from 'mongodb'
+import { MongoClient } from 'mongodb'
 
-const connectionConfig = {
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-}
-
-export async function mongoDBquery<T>(collection: string, query: { [key: string]: any }): Promise<[T] | null> {
+export async function mongoDBquery<T>(collection: string, query: { [key: string]: any }): Promise<T[] | null> {
   const client = new MongoClient(process.env.DB_CONNECTION_URI!)
   try {
     const db = client.db(process.env.DB_NAME)
@@ -17,7 +10,6 @@ export async function mongoDBquery<T>(collection: string, query: { [key: string]
     logger.info(json)
     return JSON.parse(JSON.stringify(json))
   } catch (error) {
-    logger.error(error)
     return null
   } finally {
     client.close()

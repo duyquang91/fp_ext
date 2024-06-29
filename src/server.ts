@@ -1,5 +1,5 @@
 import cors from 'cors'
-import express, { Express } from 'express'
+import express, { Express, json } from 'express'
 import helmet from 'helmet'
 import { pino } from 'pino'
 
@@ -21,6 +21,7 @@ app.set('trust proxy', true)
 app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }))
 app.use(helmet())
 app.use(rateLimiter)
+app.use(json())
 
 // Request logging
 app.use(requestLogger)

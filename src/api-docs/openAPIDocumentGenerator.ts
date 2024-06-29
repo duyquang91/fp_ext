@@ -13,6 +13,6 @@ export function generateOpenAPIDocument() {
       version: 'beta',
       title: '🐼 Food Panda Killer APIs',
       description: "This service is using by OKX's staffs internally. DO NOT public!!!",
-    }
+    },
   })
 }
