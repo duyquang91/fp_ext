@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { createApiResponse } from '@/api-docs/openAPIResponseBuilders';
 import { ResponseStatus, ServiceResponse } from '@/common/models/serviceResponse';
 import { handleServiceResponse } from '@/common/utils/httpHandlers';
-import { mySQLQuery, testConnection } from '@/common/middleware/sqlQuery';
+import { mongoDBquery, testConnection } from '@/common/middleware/sqlQuery';
 
 export const healthCheckRegistry = new OpenAPIRegistry();
 

@@ -18,18 +18,25 @@ export const userRouter: Router = (() => {
     method: 'get',
     path: '/fp/users',
     tags: ['User'],
-    request: { query: GetUserSchema.shape.query },
     responses: createApiResponse(UserSchema, 'Success'),
   });
 
-  router.get('/', validateRequest(GetUserSchema), async (req: Request<{}, {}, {}, {email?:string}>, res: Response) => {
-    if (req.query.email) {
-      const serviceResponse = await userService.findByEmail(req.query.email);
-      handleServiceResponse(serviceResponse, res);
-    } else {
-      const serviceResponse = await userService.findAll();
-      handleServiceResponse(serviceResponse, res)
-    }
+  router.get('/', async (req: Request, res: Response) => {
+    const serviceResponse = await userService.findAll();
+    handleServiceResponse(serviceResponse, res)
+  });
+
+  userRegistry.registerPath({
+    method: 'get',
+    path: '/fp/users/{id}',
+    tags: ['User'],
+    request: { params: GetUserSchema.shape.params },
+    responses: createApiResponse(UserSchema, 'Success'),
+  });
+
+  router.get('/:id', validateRequest(GetUserSchema), async (req: Request, res: Response) => {
+    const serviceResponse = await userService.findByUserId(req.params.id);
+    handleServiceResponse(serviceResponse, res);
   });
 
   return router;

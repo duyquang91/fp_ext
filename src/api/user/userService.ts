@@ -22,16 +22,16 @@ export const userService = {
   },
 
   // Retrieves a single user by their ID
-  findByEmail: async (email: string): Promise<ServiceResponse<User | null>> => {
+  findByUserId: async (id: string): Promise<ServiceResponse<User | null>> => {
     try {
-      const user = await userRepository.findByEmail(email);
+      const user = await userRepository.findByUserId(id);
       if (!user) {
         return new ServiceResponse(ResponseStatus.Failed, 'User not found', null, StatusCodes.NOT_FOUND);
       }
       logger.info(user)
       return new ServiceResponse<User>(ResponseStatus.Success, 'User found', user, StatusCodes.OK);
     } catch (ex) {
-      const errorMessage = `Error finding user with email ${email}: ${(ex as Error).message}`;
+      const errorMessage = `User: ${id} is not found by error: ${(ex as Error).message}`;
       logger.error(errorMessage);
       return new ServiceResponse(ResponseStatus.Failed, errorMessage, null, StatusCodes.INTERNAL_SERVER_ERROR);
     }
