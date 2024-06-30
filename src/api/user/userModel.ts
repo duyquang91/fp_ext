@@ -1,7 +1,6 @@
 import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi'
-import { z } from 'zod'
 import { jwtDecode } from 'jwt-decode'
-import { logger } from '@/server'
+import { z } from 'zod'
 
 extendZodWithOpenApi(z)
 
@@ -42,6 +41,7 @@ export const UpdateUserCookieSchema = z.object({
 })
 
 export function convert(initUser: InitUser): User {
+  // eslint-disable-next-line no-useless-catch
   try {
     const user = InitUserSchema.parse(initUser)
     const token = user.cookie
@@ -85,7 +85,7 @@ export function getUserIdFromCookie(cookie: string): string | undefined {
     if (jwt.client_id != 'corporate') {
       throw new Error('This account is not corporate type')
     }
-    if (jwt.expires <= Date.now()) {
+    if (jwt.expires <= Date.now() / 1000) {
       throw new Error('Token is already expired')
     }
     if (!jwt.user_id) {
@@ -100,7 +100,7 @@ export function getUserIdFromCookie(cookie: string): string | undefined {
 export function isCookieTokenExpired(cookie: string): boolean {
   const token = cookie
     .trim()
-    .split(';')
+    .split('; ')
     .map((e) => e.split('='))
     .find((e) => {
       return e[0] === 'token'

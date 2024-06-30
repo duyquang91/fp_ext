@@ -1,18 +1,11 @@
+import axios from 'axios'
 import { StatusCodes } from 'http-status-codes'
+import { UpdateResult } from 'mongodb'
 
-import {
-  InitUser,
-  UpdateCookie,
-  User,
-  UserSchema,
-  getUserIdFromCookie,
-  isCookieTokenExpired,
-} from '@/api/user/userModel'
+import { InitUser, User } from '@/api/user/userModel'
 import { userRepository } from '@/api/user/userRepository'
 import { ResponseStatus, ServiceResponse } from '@/common/models/serviceResponse'
 import { logger } from '@/server'
-import { UpdateResult } from 'mongodb'
-import axios from 'axios'
 
 export const userService = {
   // Retrieves all users from the database
@@ -65,9 +58,10 @@ export const userService = {
   },
 
   updateUserCookie: async (userCookie: string): Promise<ServiceResponse<UpdateResult | null>> => {
+    logger.info(Date.now())
     try {
       const result = await userRepository.updateUserCookie(userCookie)
-      if (!result || !result.acknowledged) {
+      if (!result) {
         return new ServiceResponse(
           ResponseStatus.Failed,
           'Unable to update this user',
@@ -81,8 +75,8 @@ export const userService = {
       } else {
         return new ServiceResponse(
           ResponseStatus.Failed,
-          'Unable to update this user',
-          null,
+          'Cookie is not updated. Maybe the same value',
+          result,
           StatusCodes.INTERNAL_SERVER_ERROR
         )
       }
@@ -99,21 +93,23 @@ export const userService = {
       // }
       const res = await axios.get('https://www.foodpanda.sg', {
         headers: {
-          referer: 'https://www.foodpanda.sg/',
-          'sec-fetch-site': 'same-origin',
-          'sec-fetch-mode': 'navigate',
+          Host: 'www.foodpanda.sg',
+          Cookie: cookie,
+          'sec-ch-ua': '"Brave";v="113", "Chromium";v="113", "Not-A.Brand";v="24"',
+          'user-agent':
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36',
+          'cache-control': 'max-age=0',
+          accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+          'sec-ch-ua-mobile': '?0',
+          'sec-ch-ua-platform': '"macOS"',
           'upgrade-insecure-requests': '1',
           'sec-gpc': '1',
-          'sec-ch-ua': '"Brave";v="113", "Chromium";v="113", "Not-A.Brand";v="24"',
-          'sec-fetch-dest': 'document',
+          'accept-language': 'en-GB,en;q=0.7',
+          'sec-fetch-site': 'same-origin',
+          'sec-fetch-mode': 'navigate',
           'sec-fetch-user': '?1',
-          connection: 'keep-alive',
-          Accept: '*/*',
-          'Accept-Encoding': 'gzip, deflate, br',
-          Cookie: cookie,
-          'cache-control': 'max-age=0',
-          Host: 'www.foodpanda.sg',
-          accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+          'sec-fetch-dest': 'document',
+          referer: 'https://www.foodpanda.sg/',
         },
       })
       logger.info(res.headers)
