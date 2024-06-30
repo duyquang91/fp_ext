@@ -1,11 +1,18 @@
 import { StatusCodes } from 'http-status-codes'
 
-import { InitUser, UpdateCookie, User, UserSchema, getUserIdFromCookie, isCookieTokenExpired } from '@/api/user/userModel'
+import {
+  InitUser,
+  UpdateCookie,
+  User,
+  UserSchema,
+  getUserIdFromCookie,
+  isCookieTokenExpired,
+} from '@/api/user/userModel'
 import { userRepository } from '@/api/user/userRepository'
 import { ResponseStatus, ServiceResponse } from '@/common/models/serviceResponse'
 import { logger } from '@/server'
 import { UpdateResult } from 'mongodb'
-import axios from'axios'
+import axios from 'axios'
 
 export const userService = {
   // Retrieves all users from the database
@@ -90,10 +97,28 @@ export const userService = {
       // if (!isCookieTokenExpired(cookie)) {
       //   return new ServiceResponse(ResponseStatus.Success, 'Token is still valid, no need to refresh', null, StatusCodes.OK)
       // }
-      const res = await axios.get('https://www.foodpanda.sg', { headers: {'referer': 'https://www.foodpanda.sg/', 'sec-fetch-site': 'same-origin', 'sec-fetch-mode': 'navigate', 'upgrade-insecure-requests': '1', 'sec-gpc': '1', 'sec-fetch-dest': 'document', 'sec-fetch-user': '?1', 'Cookie': cookie, 'Host': 'www.foodpanda.sg', 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8'} })
+      const res = await axios.get('https://www.foodpanda.sg', {
+        headers: {
+          referer: 'https://www.foodpanda.sg/',
+          'sec-fetch-site': 'same-origin',
+          'sec-fetch-mode': 'navigate',
+          'upgrade-insecure-requests': '1',
+          'sec-gpc': '1',
+          'sec-fetch-dest': 'document',
+          'sec-fetch-user': '?1',
+          Cookie: cookie,
+          Host: 'www.foodpanda.sg',
+          accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        },
+      })
       logger.info(res.headers)
-      return new ServiceResponse(ResponseStatus.Success, 'Success to refresh to cookie', res.headers['set-cookie']!.join(';'), StatusCodes.OK)
-    } catch(error) {
+      return new ServiceResponse(
+        ResponseStatus.Success,
+        'Success to refresh to cookie',
+        res.headers['set-cookie']!.join(';'),
+        StatusCodes.OK
+      )
+    } catch (error) {
       return new ServiceResponse(ResponseStatus.Failed, (error as Error).message, null, StatusCodes.BAD_REQUEST)
     }
   },
