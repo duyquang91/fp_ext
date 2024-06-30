@@ -81,5 +81,23 @@ export const userRouter: Router = (() => {
     handleServiceResponse(serviceResponse, res)
   })
 
+  userRegistry.registerPath({
+    method: 'post',
+    path: '/fp/users/refreshCookie',
+    tags: ['User'],
+    request: {
+      body: {
+        description: 'Forward request to Food panda with the cookie then parse the response cookie, still testing',
+        content: { 'application/json': { schema: UpdateUserCookieSchema.shape.body } },
+      },
+    },
+    responses: createApiResponse(UserSchema, 'Success'),
+  })
+
+  router.post('/refreshCookie', async (req: Request, res: Response) => {
+    const serviceResponse = await userService.refreshCookie(req.body['cookie'])
+    handleServiceResponse(serviceResponse, res)
+  })
+
   return router
 })()

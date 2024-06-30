@@ -72,7 +72,6 @@ export function convert(initUser: InitUser): User {
 }
 
 export function getUserIdFromCookie(cookie: string): string | undefined {
-  logger.info(cookie)
   const token = cookie
     .trim()
     .split('; ')
@@ -96,4 +95,30 @@ export function getUserIdFromCookie(cookie: string): string | undefined {
   } else {
     throw new Error('Token is not found')
   }
+}
+
+export function isCookieTokenExpired(cookie: string): boolean {
+  const token = cookie
+  .trim()
+  .split(';')
+  .map((e) => e.split('='))
+  .find((e) => {
+    return e[0] === 'token'
+  })?.[1]
+
+if (token || token?.trim() === '') {
+  const jwt = jwtDecode<{ user_id: string; client_id: string; expires: number }>(token)
+  if (jwt.client_id != 'corporate') {
+    throw new Error('This account is not corporate type')
+  }
+  if (jwt.expires <= Date.now()) {
+    return true
+  }
+  if (!jwt.user_id) {
+    throw new Error('user id is not found')
+  }
+  return false
+} else {
+  throw new Error('Token is not found')
+}
 }
