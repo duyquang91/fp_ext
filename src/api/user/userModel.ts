@@ -46,10 +46,10 @@ export function convert(initUser: InitUser): User {
     const user = InitUserSchema.parse(initUser)
     const token = user.cookie
       .trim()
-      .split('; ')
+      .split(';')
       .map((e) => e.split('='))
       .find((e) => {
-        return e[0] === 'token'
+        return e[0].trim() === 'token'
       })?.[1]
     if (token) {
       const jwt = jwtDecode<{ user_id: string; client_id: string; expires: number }>(token)
@@ -74,10 +74,10 @@ export function convert(initUser: InitUser): User {
 export function getUserIdFromCookie(cookie: string): string | undefined {
   const token = cookie
     .trim()
-    .split('; ')
+    .split(';')
     .map((e) => e.split('='))
     .find((e) => {
-      return e[0] === 'token'
+      return e[0].trim() === 'token'
     })?.[1]
 
   if (token || token?.trim() === '') {
@@ -100,10 +100,10 @@ export function getUserIdFromCookie(cookie: string): string | undefined {
 export function isCookieTokenExpired(cookie: string): boolean {
   const token = cookie
     .trim()
-    .split('; ')
+    .split(';')
     .map((e) => e.split('='))
     .find((e) => {
-      return e[0] === 'token'
+      return e[0].trim() === 'token'
     })?.[1]
 
   if (token || token?.trim() === '') {
