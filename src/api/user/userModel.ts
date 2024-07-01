@@ -32,7 +32,7 @@ export const PostInitUserRequestSchema = z.object({
 
 export type RefreshCookie = z.infer<typeof RefreshCookieSchema>
 export const RefreshCookieSchema = z.object({
-  params: z.object({ userId: z.string().min(1) })
+  params: z.object({ userId: z.string().min(1) }),
 })
 
 export type UpdateCookie = z.infer<typeof UpdateCookieSchema>

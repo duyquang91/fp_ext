@@ -2,7 +2,7 @@ import axios from 'axios'
 import { StatusCodes } from 'http-status-codes'
 import { UpdateResult } from 'mongodb'
 
-import { InitUser, User, isCookieTokenExpired } from '@/api/user/userModel'
+import { InitUser, isCookieTokenExpired, User } from '@/api/user/userModel'
 import { userRepository } from '@/api/user/userRepository'
 import { ResponseStatus, ServiceResponse } from '@/common/models/serviceResponse'
 import { logger } from '@/server'
@@ -41,7 +41,7 @@ export const userService = {
   createUser: async (initUser: InitUser): Promise<ServiceResponse<UpdateResult | null>> => {
     try {
       const result = await userRepository.createUser(initUser)
-      if (!result || !result.acknowledged) {
+      if (!result.acknowledged) {
         return new ServiceResponse(
           ResponseStatus.Failed,
           'Unable to create this user',
@@ -61,14 +61,7 @@ export const userService = {
     logger.info(Date.now())
     try {
       const result = await userRepository.updateUserCookie(userCookie)
-      if (!result) {
-        return new ServiceResponse(
-          ResponseStatus.Failed,
-          'Unable to update this user',
-          null,
-          StatusCodes.INTERNAL_SERVER_ERROR
-        )
-      } else if (result.matchedCount === 0) {
+      if (result.matchedCount === 0) {
         return new ServiceResponse(ResponseStatus.Failed, 'User is not found', null, StatusCodes.NOT_FOUND)
       } else if (result.modifiedCount === 1) {
         return new ServiceResponse(ResponseStatus.Success, 'User is updated', null, StatusCodes.OK)
@@ -90,14 +83,29 @@ export const userService = {
     try {
       const user = await userRepository.findByUserId(userId)
       if (!user) {
-        return new ServiceResponse(ResponseStatus.Failed, 'User is not found, need to create first', null, StatusCodes.BAD_REQUEST)
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          'User is not found, need to create first',
+          null,
+          StatusCodes.BAD_REQUEST
+        )
       }
       if (user.cookie === '') {
-        return new ServiceResponse(ResponseStatus.Failed, 'User found but cookie is unavailable. Ask owner to update', null, StatusCodes.BAD_REQUEST)
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          'User found but cookie is unavailable. Ask owner to update',
+          null,
+          StatusCodes.BAD_REQUEST
+        )
       }
       const cookie = user.cookie
       if (!isCookieTokenExpired(cookie)) {
-        return new ServiceResponse(ResponseStatus.Failed, 'Token is still valid, no need to refresh', null, StatusCodes.BAD_REQUEST)
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          'Token is still valid, no need to refresh',
+          null,
+          StatusCodes.BAD_REQUEST
+        )
       }
       const res = await axios.get('https://www.foodpanda.sg', {
         headers: {
@@ -125,16 +133,16 @@ export const userService = {
       if (!newCookie) {
         return new ServiceResponse(ResponseStatus.Failed, 'No cookie from response', null, StatusCodes.BAD_REQUEST)
       }
-      const token = newCookie.find(e => e.split(';').find(e => e.split('=')[0] === 'token'))?.split(';').find(e => e.split('=')[0] === 'token')?.split('=')[1]
+      const token = newCookie
+        .find((e) => e.split(';').find((e) => e.split('=')[0] === 'token'))
+        ?.split(';')
+        .find((e) => e.split('=')[0] === 'token')
+        ?.split('=')[1]
       if (!token || token === '') {
         return new ServiceResponse(ResponseStatus.Failed, 'No token from cookie', newCookieStr, StatusCodes.BAD_REQUEST)
       }
-      return new ServiceResponse(
-        ResponseStatus.Success,
-        'Success to refresh to token',
-        token,
-        StatusCodes.OK
-      )
+      userRepository.updateUserToken(userId, token)
+      return new ServiceResponse(ResponseStatus.Success, 'Success to refresh to token', token, StatusCodes.OK)
     } catch (error) {
       return new ServiceResponse(ResponseStatus.Failed, (error as Error).message, null, StatusCodes.BAD_REQUEST)
     }
