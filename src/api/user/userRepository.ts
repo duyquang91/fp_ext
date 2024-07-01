@@ -1,4 +1,4 @@
-import { InitUser, UpdateCookie, User, UserSchema, convert, getUserIdFromCookie } from '@/api/user/userModel'
+import { InitUser, RefreshCookie, User, UserSchema, convert, getUserIdFromCookie } from '@/api/user/userModel'
 import { mongoDBquery } from '@/common/middleware/sqlQuery'
 import { logger } from '@/server'
 import { query } from 'express'

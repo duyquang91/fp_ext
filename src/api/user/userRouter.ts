@@ -1,11 +1,12 @@
 import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi'
 import express, { Request, Response, Router } from 'express'
 import {
-  GetUserSchema,
+  GetUserRequestSchema,
   InitUser,
-  PostInitUserSchema,
+  PostInitUserRequestSchema,
+  RefreshCookieSchema,
   UpdateCookieSchema,
-  UpdateUserCookieSchema,
+  UpdateUserCookieRequestSchema,
   UserSchema,
 } from '@/api/user/userModel'
 import { userService } from '@/api/user/userService'
@@ -36,11 +37,11 @@ export const userRouter: Router = (() => {
     method: 'get',
     path: '/fp/users/{id}',
     tags: ['User'],
-    request: { params: GetUserSchema.shape.params },
+    request: { params: GetUserRequestSchema.shape.params },
     responses: createApiResponse(UserSchema, 'Success'),
   })
 
-  router.get('/:id', validateRequest(GetUserSchema), async (req: Request, res: Response) => {
+  router.get('/:id', validateRequest(GetUserRequestSchema), async (req: Request, res: Response) => {
     const serviceResponse = await userService.findByUserId(req.params.id)
     handleServiceResponse(serviceResponse, res)
   })
@@ -52,7 +53,7 @@ export const userRouter: Router = (() => {
     request: {
       body: {
         description: 'Backend will parse the userId & authToken then create the user together',
-        content: { 'application/json': { schema: PostInitUserSchema.shape.body } },
+        content: { 'application/json': { schema: PostInitUserRequestSchema.shape.body } },
       },
     },
     responses: createApiResponse(UserSchema, 'Success'),
@@ -70,7 +71,7 @@ export const userRouter: Router = (() => {
     request: {
       body: {
         description: 'Backend will parse the userId & authToken then update the user together',
-        content: { 'application/json': { schema: UpdateUserCookieSchema.shape.body } },
+        content: { 'application/json': { schema: UpdateUserCookieRequestSchema.shape.body } },
       },
     },
     responses: createApiResponse(UserSchema, 'Success'),
@@ -82,20 +83,17 @@ export const userRouter: Router = (() => {
   })
 
   userRegistry.registerPath({
-    method: 'post',
-    path: '/fp/users/refreshCookie',
+    method: 'get',
+    path: '/fp/users/refreshToken/{userId}',
     tags: ['User'],
     request: {
-      body: {
-        description: 'Forward request to Food panda with the cookie then parse the response cookie, still testing',
-        content: { 'application/json': { schema: UpdateUserCookieSchema.shape.body } },
-      },
+      params: RefreshCookieSchema.shape.params
     },
     responses: createApiResponse(UserSchema, 'Success'),
   })
 
-  router.post('/refreshCookie', async (req: Request, res: Response) => {
-    const serviceResponse = await userService.refreshCookie(req.body['cookie'])
+  router.get('/refreshToken/:userId', async (req: Request, res: Response) => {
+    const serviceResponse = await userService.refreshToken(req.params.userId)
     handleServiceResponse(serviceResponse, res)
   })
 

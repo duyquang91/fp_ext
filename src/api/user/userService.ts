@@ -2,7 +2,7 @@ import axios from 'axios'
 import { StatusCodes } from 'http-status-codes'
 import { UpdateResult } from 'mongodb'
 
-import { InitUser, User } from '@/api/user/userModel'
+import { InitUser, User, isCookieTokenExpired } from '@/api/user/userModel'
 import { userRepository } from '@/api/user/userRepository'
 import { ResponseStatus, ServiceResponse } from '@/common/models/serviceResponse'
 import { logger } from '@/server'
@@ -86,11 +86,19 @@ export const userService = {
     }
   },
 
-  refreshCookie: async (cookie: string): Promise<ServiceResponse<string | null>> => {
+  refreshToken: async (userId: string): Promise<ServiceResponse<string | null>> => {
     try {
-      // if (!isCookieTokenExpired(cookie)) {
-      //   return new ServiceResponse(ResponseStatus.Success, 'Token is still valid, no need to refresh', null, StatusCodes.OK)
-      // }
+      const user = await userRepository.findByUserId(userId)
+      if (!user) {
+        return new ServiceResponse(ResponseStatus.Failed, 'User is not found, need to create first', null, StatusCodes.BAD_REQUEST)
+      }
+      if (user.cookie === '') {
+        return new ServiceResponse(ResponseStatus.Failed, 'User found but cookie is unavailable. Ask owner to update', null, StatusCodes.BAD_REQUEST)
+      }
+      const cookie = user.cookie
+      if (!isCookieTokenExpired(cookie)) {
+        return new ServiceResponse(ResponseStatus.Failed, 'Token is still valid, no need to refresh', null, StatusCodes.BAD_REQUEST)
+      }
       const res = await axios.get('https://www.foodpanda.sg', {
         headers: {
           Host: 'www.foodpanda.sg',
@@ -112,11 +120,19 @@ export const userService = {
           referer: 'https://www.foodpanda.sg/',
         },
       })
-      logger.info(res.headers)
+      const newCookie = res.headers['set-cookie']
+      const newCookieStr = newCookie?.join('<|>') ?? 'Empty cookie'
+      if (!newCookie) {
+        return new ServiceResponse(ResponseStatus.Failed, 'No cookie from response', null, StatusCodes.BAD_REQUEST)
+      }
+      const token = newCookie.find(e => e.split(';').find(e => e.split('=')[0] === 'token'))?.split(';').find(e => e.split('=')[0] === 'token')?.split('=')[1]
+      if (!token || token === '') {
+        return new ServiceResponse(ResponseStatus.Failed, 'No token from cookie', newCookieStr, StatusCodes.BAD_REQUEST)
+      }
       return new ServiceResponse(
         ResponseStatus.Success,
-        'Success to refresh to cookie',
-        res.headers['set-cookie']!.join(';'),
+        'Success to refresh to token',
+        token,
         StatusCodes.OK
       )
     } catch (error) {

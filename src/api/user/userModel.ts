@@ -14,7 +14,7 @@ export const UserSchema = z.object({
 })
 
 // Input Validation for 'GET users/:email' endpoint
-export const GetUserSchema = z.object({
+export const GetUserRequestSchema = z.object({
   params: z.object({ id: z.string() }),
 })
 
@@ -26,8 +26,13 @@ export const InitUserSchema = z.object({
 })
 
 // Input Validation for 'POST users/update' endpoint
-export const PostInitUserSchema = z.object({
+export const PostInitUserRequestSchema = z.object({
   body: InitUserSchema,
+})
+
+export type RefreshCookie = z.infer<typeof RefreshCookieSchema>
+export const RefreshCookieSchema = z.object({
+  params: z.object({ userId: z.string().min(1) })
 })
 
 export type UpdateCookie = z.infer<typeof UpdateCookieSchema>
@@ -36,7 +41,7 @@ export const UpdateCookieSchema = z.object({
 })
 
 // Input Validation for 'POST users/update' endpoint
-export const UpdateUserCookieSchema = z.object({
+export const UpdateUserCookieRequestSchema = z.object({
   body: UpdateCookieSchema,
 })
 
