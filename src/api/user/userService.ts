@@ -9,9 +9,9 @@ import { logger } from '@/server'
 
 export const userService = {
   // Retrieves all users from the database
-  findAll: async (): Promise<ServiceResponse<User[] | null>> => {
+  findAll: async (userId?: string, group?: string): Promise<ServiceResponse<User[] | null>> => {
     try {
-      const users = await userRepository.findAllAsync()
+      const users = await userRepository.findAllAsync(userId, group)
       if (users.length == 0) {
         return new ServiceResponse(ResponseStatus.Failed, 'No Users found', null, StatusCodes.NOT_FOUND)
       }
@@ -58,7 +58,6 @@ export const userService = {
   },
 
   updateUserCookie: async (userCookie: string): Promise<ServiceResponse<UpdateResult | null>> => {
-    logger.info(Date.now())
     try {
       const result = await userRepository.updateUserCookie(userCookie)
       if (result.matchedCount === 0) {

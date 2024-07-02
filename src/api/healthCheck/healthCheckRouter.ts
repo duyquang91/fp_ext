@@ -4,9 +4,9 @@ import { StatusCodes } from 'http-status-codes'
 import { z } from 'zod'
 
 import { createApiResponse } from '@/api-docs/openAPIResponseBuilders'
+import { testConnection } from '@/common/middleware/mongoDBquery'
 import { ResponseStatus, ServiceResponse } from '@/common/models/serviceResponse'
 import { handleServiceResponse } from '@/common/utils/httpHandlers'
-import { mongoDBquery, testConnection } from '@/common/middleware/sqlQuery'
 
 export const healthCheckRegistry = new OpenAPIRegistry()
 

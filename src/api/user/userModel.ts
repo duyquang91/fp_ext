@@ -15,7 +15,10 @@ export const UserSchema = z.object({
 
 // Input Validation for 'GET users/:email' endpoint
 export const GetUserRequestSchema = z.object({
-  params: z.object({ id: z.string() }),
+  query: z.object({
+    userId: z.string().optional(),
+    group: z.string().optional(),
+  }),
 })
 
 export type InitUser = z.infer<typeof InitUserSchema>
