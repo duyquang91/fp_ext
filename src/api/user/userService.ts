@@ -141,7 +141,7 @@ export const userService = {
       if (!token || token === '') {
         return new ServiceResponse(ResponseStatus.Failed, 'No token from cookie', newCookieStr, StatusCodes.BAD_REQUEST)
       }
-      userRepository.updateUserToken(userId, token)
+      await userRepository.updateUserToken(userId, token)
       return new ServiceResponse(ResponseStatus.Success, 'Success to refresh to token', token, StatusCodes.OK)
     } catch (error) {
       return new ServiceResponse(ResponseStatus.Failed, (error as Error).message, null, StatusCodes.BAD_REQUEST)
