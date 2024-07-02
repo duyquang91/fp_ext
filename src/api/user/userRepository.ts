@@ -1,6 +1,6 @@
 import { MongoClient, UpdateResult } from 'mongodb'
 
-import { convert, getUserIdFromCookie, InitUser, User } from '@/api/user/userModel'
+import { convert, getPayloadFromCookie, InitUser, User } from '@/api/user/userModel'
 import { mongoDBquery } from '@/common/middleware/sqlQuery'
 
 export const userRepository = {
@@ -33,11 +33,12 @@ export const userRepository = {
   updateUserCookie: async (cookie: string): Promise<UpdateResult> => {
     let client: MongoClient | undefined
     try {
-      const userId = getUserIdFromCookie(cookie)
+      const { userId, authToken } = getPayloadFromCookie(cookie)
+
       client = new MongoClient(process.env.DB_CONNECTION_URI!)
       const db = client.db(process.env.DB_NAME)
       const col = db.collection('users')
-      const json = await col.updateOne({ userId: userId }, { $set: { cookie: cookie } })
+      const json = await col.updateOne({ userId: userId }, { $set: { cookie: cookie, authToken: authToken } })
       return JSON.parse(JSON.stringify(json))
       // eslint-disable-next-line no-useless-catch
     } catch (error) {

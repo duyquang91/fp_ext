@@ -76,7 +76,7 @@ export function convert(initUser: InitUser): User {
   }
 }
 
-export function getUserIdFromCookie(cookie: string): string | undefined {
+export function getPayloadFromCookie(cookie: string): { userId: string; authToken: string } {
   const token = cookie
     .trim()
     .split(';')
@@ -96,7 +96,7 @@ export function getUserIdFromCookie(cookie: string): string | undefined {
     if (!jwt.user_id) {
       throw new Error('user id is not found')
     }
-    return jwt.user_id
+    return { userId: jwt.user_id, authToken: token }
   } else {
     throw new Error('Token is not found')
   }
