@@ -7,7 +7,7 @@ export async function mongoDBquery<T>(collection: string, query: { [key: string]
   try {
     const db = client.db(process.env.DB_NAME)
     const col = db.collection(collection)
-    const json = await col.find(query, { projection: { _id: 0 } }).toArray()
+    const json = await col.find(query, { projection: { _id: 0, group: 0 } }).toArray()
     return JSON.parse(JSON.stringify(json))
   } catch (error) {
     return null

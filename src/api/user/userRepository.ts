@@ -7,9 +7,11 @@ export const userRepository = {
     if (userId) {
       return (await mongoDBquery<User>('users', { userId: userId })) ?? []
     } else if (group) {
-      return (await mongoDBquery('users', { $or: [{ group: { $exists: false } }, { group: group }] })) ?? []
+      return (
+        (await mongoDBquery('users', { $or: [{ group: { $exists: false } }, { group: null }, { group: group }] })) ?? []
+      )
     } else {
-      return (await mongoDBquery('users', { group: { $exists: false } })) ?? []
+      return (await mongoDBquery('users', { $or: [{ group: { $exists: false } }, { group: null }] })) ?? []
     }
   },
 

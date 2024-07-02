@@ -11,6 +11,7 @@ export const UserSchema = z.object({
   email: z.string().email(),
   authToken: z.string().min(0),
   cookie: z.string().min(0),
+  group: z.string().min(1).optional(),
 })
 
 // Input Validation for 'GET users/:email' endpoint
@@ -26,6 +27,7 @@ export const InitUserSchema = z.object({
   name: z.string().min(1),
   email: z.string().email(),
   cookie: z.string().min(1),
+  group: z.string().min(1).optional(),
 })
 
 // Input Validation for 'POST users/update' endpoint
@@ -70,6 +72,7 @@ export function convert(initUser: InitUser): User {
         authToken: token,
         cookie: initUser.cookie,
         userId: jwt.user_id,
+        group: initUser.group,
       }
     } else {
       throw new Error('Token is missing from cookie')
@@ -119,7 +122,7 @@ export function isCookieTokenExpired(cookie: string): boolean {
     if (jwt.client_id != 'corporate') {
       throw new Error('This account is not corporate type')
     }
-    if (jwt.expires <= Date.now()) {
+    if (jwt.expires <= Date.now() / 1000) {
       return true
     }
     if (!jwt.user_id) {
