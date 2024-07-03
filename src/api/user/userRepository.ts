@@ -55,11 +55,11 @@ export const userRepository = {
     }
   },
 
-  updateUserToken: async (userId: string, token: string): Promise<UpdateResult | null> => {
+  updateUserToken: async (userId: string, token: string, cookie: string): Promise<UpdateResult | null> => {
     const client = new MongoClient(process.env.DB_CONNECTION_URI!)
     const db = client.db(process.env.DB_NAME)
     const col = db.collection('users')
-    const json = await col.updateOne({ userId: userId }, { $set: { authToken: token } })
+    const json = await col.updateOne({ userId: userId }, { $set: { authToken: token, cookie: cookie } })
     client.close()
     return JSON.parse(JSON.stringify(json))
   },

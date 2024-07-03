@@ -2,9 +2,10 @@ import axios from 'axios'
 import { StatusCodes } from 'http-status-codes'
 import { UpdateResult } from 'mongodb'
 
-import { InitUser, isCookieTokenExpired, User } from '@/api/user/userModel'
+import { InitUser, isTokenExpired, User } from '@/api/user/userModel'
 import { userRepository } from '@/api/user/userRepository'
 import { ResponseStatus, ServiceResponse } from '@/common/models/serviceResponse'
+import parseCookies from '@/common/utils/cookiePaser'
 import { logger } from '@/server'
 
 export const userService = {
@@ -97,15 +98,15 @@ export const userService = {
           StatusCodes.BAD_REQUEST
         )
       }
-      const cookie = user.cookie
-      if (!isCookieTokenExpired(cookie)) {
+      if (!isTokenExpired(user.authToken)) {
         return new ServiceResponse(
           ResponseStatus.Failed,
           'Token is still valid, no need to refresh',
-          null,
+          user.authToken,
           StatusCodes.BAD_REQUEST
         )
       }
+      const cookie = user.cookie
       const res = await axios.get('https://www.foodpanda.sg', {
         headers: {
           Host: 'www.foodpanda.sg',
@@ -128,19 +129,15 @@ export const userService = {
         },
       })
       const newCookie = res.headers['set-cookie']
-      const newCookieStr = newCookie?.join('<|>') ?? 'Empty cookie'
+      const newCookieStr = newCookie?.join(', ') ?? 'Empty cookie'
       if (!newCookie) {
         return new ServiceResponse(ResponseStatus.Failed, 'No cookie from response', null, StatusCodes.BAD_REQUEST)
       }
-      const token = newCookie
-        .find((e) => e.split(';').find((e) => e.split('=')[0] === 'token'))
-        ?.split(';')
-        .find((e) => e.split('=')[0] === 'token')
-        ?.split('=')[1]
+      const token = parseCookies(newCookieStr).find((e) => e.cookieName === 'token')?.cookieValue
       if (!token || token === '') {
         return new ServiceResponse(ResponseStatus.Failed, 'No token from cookie', newCookieStr, StatusCodes.BAD_REQUEST)
       }
-      await userRepository.updateUserToken(userId, token)
+      await userRepository.updateUserToken(userId, token, newCookieStr)
       return new ServiceResponse(ResponseStatus.Success, 'Success to refresh to token', token, StatusCodes.OK)
     } catch (error) {
       return new ServiceResponse(ResponseStatus.Failed, (error as Error).message, null, StatusCodes.BAD_REQUEST)

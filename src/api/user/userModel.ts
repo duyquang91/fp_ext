@@ -108,28 +108,11 @@ export function getPayloadFromCookie(cookie: string): { userId: string; authToke
   }
 }
 
-export function isCookieTokenExpired(cookie: string): boolean {
-  const token = cookie
-    .trim()
-    .split(';')
-    .map((e) => e.split('='))
-    .find((e) => {
-      return e[0].trim() === 'token'
-    })?.[1]
-
-  if (token || token?.trim() === '') {
-    const jwt = jwtDecode<{ user_id: string; client_id: string; expires: number }>(token)
-    if (jwt.client_id != 'corporate') {
-      throw new Error('This account is not corporate type')
-    }
-    if (jwt.expires <= Date.now() / 1000) {
-      return true
-    }
-    if (!jwt.user_id) {
-      throw new Error('user id is not found')
-    }
-    return false
+export function isTokenExpired(token: string): boolean {
+  const jwt = jwtDecode<{ expires: number }>(token)
+  if (jwt.expires) {
+    return jwt.expires <= Date.now() / 1000
   } else {
-    throw new Error('Token is not found')
+    throw new Error('Token doesnt has expires field')
   }
 }
