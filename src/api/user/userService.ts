@@ -5,7 +5,7 @@ import { UpdateResult } from 'mongodb'
 import { InitUser, isTokenExpired, User } from '@/api/user/userModel'
 import { userRepository } from '@/api/user/userRepository'
 import { ResponseStatus, ServiceResponse } from '@/common/models/serviceResponse'
-import parseCookies from '@/common/utils/cookiePaser'
+import parseCookies, { update } from '@/common/utils/cookiePaser'
 import { logger } from '@/server'
 
 export const userService = {
@@ -128,16 +128,22 @@ export const userService = {
           referer: 'https://www.foodpanda.sg/',
         },
       })
+
       const newCookie = res.headers['set-cookie']
       const newCookieStr = newCookie?.join(', ') ?? 'Empty cookie'
+
       if (!newCookie) {
         return new ServiceResponse(ResponseStatus.Failed, 'No cookie from response', null, StatusCodes.BAD_REQUEST)
       }
-      const token = parseCookies(newCookieStr).find((e) => e.cookieName === 'token')?.cookieValue
+
+      const newParsedCookie = parseCookies(newCookieStr)
+      const token = newParsedCookie.find((e) => e.cookieName === 'token')?.cookieValue
+
       if (!token || token === '') {
         return new ServiceResponse(ResponseStatus.Failed, 'No token from cookie', newCookieStr, StatusCodes.BAD_REQUEST)
       }
-      await userRepository.updateUserToken(userId, token, newCookieStr)
+
+      await userRepository.updateUserToken(userId, token, update(newParsedCookie, user.cookie))
       return new ServiceResponse(ResponseStatus.Success, 'Success to refresh to token', token, StatusCodes.OK)
     } catch (error) {
       return new ServiceResponse(ResponseStatus.Failed, (error as Error).message, null, StatusCodes.BAD_REQUEST)

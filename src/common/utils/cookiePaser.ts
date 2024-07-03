@@ -111,3 +111,14 @@ export default function parseCookies(rawCookies: string): ParsedCookie[] {
 
   return parsedCookies
 }
+
+export function update(parsedCookies: ParsedCookie[], cookieString: string): string {
+  const cookies = cookieString.split('; ').map((e) => e.split('='))
+  parsedCookies.forEach((cookie) => {
+    const foundCookie = cookies.find((e) => e[0] === cookie.cookieName)
+    if (foundCookie) {
+      foundCookie[1] = cookie.cookieValue
+    }
+  })
+  return cookies.map((e) => e.join('=')).join('; ')
+}
