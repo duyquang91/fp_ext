@@ -6,13 +6,13 @@ const validCookie = ` __cf_bm=frB_AqvRSjGd4FwjWeYrCxPIXiMWRJYresgzLKKE4ho-171967
 
 describe('Validate InitUser', () => {
   it('Validate init user model', () => {
-    expect(() => convert({ name: '', email: 'steve@test.com', cookie: 'wed' })).toThrowError()
-    expect(() => convert({ name: 'Steve', email: '', cookie: 'wdewd' })).toThrowError()
-    expect(() => convert({ name: 'Steve', email: 'steve@test.com', cookie: '' })).toThrowError()
-    expect(() => convert({ name: 'Steve', email: 'steve@test', cookie: 'ADWDW' })).toThrowError()
+    expect(() => convert({ name: '', cookie: 'wed' })).toThrowError()
+    expect(() => convert({ name: 'Steve', cookie: 'wdewd' })).toThrowError()
+    expect(() => convert({ name: 'Steve', cookie: '' })).toThrowError()
+    expect(() => convert({ name: 'Steve', cookie: 'ADWDW' })).toThrowError()
   })
 
   it('Validate cookie', () => {
-    expect(() => convert({ name: 'Steve', email: 'steve@test.com', cookie: validCookie })).not.toThrowError()
+    expect(() => convert({ name: 'Steve', cookie: validCookie })).not.toThrowError()
   })
 })

@@ -3,13 +3,15 @@ import { MongoClient, UpdateResult } from 'mongodb'
 import { convert, getPayloadFromCookie, InitUser, User } from '@/api/user/userModel'
 import { mongoDBquery } from '@/common/middleware/mongoDBquery'
 export const userRepository = {
-  findAllAsync: async (userId?: string, group?: string): Promise<User[]> => {
+  findAllAsync: async (userId?: string, group?: string, shareWith?: string): Promise<User[]> => {
     if (userId) {
       return (await mongoDBquery<User>('users', { userId: userId })) ?? []
     } else if (group) {
       return (
         (await mongoDBquery('users', { $or: [{ group: { $exists: false } }, { group: null }, { group: group }] })) ?? []
       )
+    } else if (shareWith) {
+      return (await mongoDBquery('users', { shareWith: `${shareWith}` })) ?? []
     } else {
       return (await mongoDBquery('users', { $or: [{ group: { $exists: false } }, { group: null }] })) ?? []
     }
@@ -18,6 +20,11 @@ export const userRepository = {
   findByUserId: async (id: string): Promise<User | null> => {
     const results = (await mongoDBquery<User>('users', { userId: id })) ?? []
     return results[0] ?? null
+  },
+
+  findByUserIdWithShareWith: async (id: string): Promise<User | null> => {
+    const results = (await mongoDBquery<User>('users', { userId: id })) ?? []
+    return results.filter((res) => res.shareWith) ?? null
   },
 
   createUser: async (initUser: InitUser): Promise<UpdateResult> => {

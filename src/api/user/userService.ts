@@ -2,7 +2,7 @@ import axios from 'axios'
 import { StatusCodes } from 'http-status-codes'
 import { UpdateResult } from 'mongodb'
 
-import { InitUser, isTokenExpired, User } from '@/api/user/userModel'
+import { getPayloadFromCookie, InitUser, isTokenExpired, User } from '@/api/user/userModel'
 import { userRepository } from '@/api/user/userRepository'
 import { ResponseStatus, ServiceResponse } from '@/common/models/serviceResponse'
 import parseCookies, { update } from '@/common/utils/cookiePaser'
@@ -10,12 +10,9 @@ import { logger } from '@/server'
 
 export const userService = {
   // Retrieves all users from the database
-  findAll: async (userId?: string, group?: string): Promise<ServiceResponse<User[] | null>> => {
+  findAll: async (userId?: string, group?: string, shareWith?: string): Promise<ServiceResponse<User[] | null>> => {
     try {
-      const users = await userRepository.findAllAsync(userId, group)
-      if (users.length == 0) {
-        return new ServiceResponse(ResponseStatus.Failed, 'No Users found', null, StatusCodes.NOT_FOUND)
-      }
+      const users = await userRepository.findAllAsync(userId, group, shareWith)
       return new ServiceResponse(ResponseStatus.Success, 'Users found', users, StatusCodes.OK)
     } catch (ex) {
       const errorMessage = `Error finding all users: ${ex}`
@@ -41,6 +38,13 @@ export const userService = {
 
   createUser: async (initUser: InitUser): Promise<ServiceResponse<UpdateResult | null>> => {
     try {
+      const { userId } = getPayloadFromCookie(initUser.cookie)
+      const user = await userRepository.findByUserId(userId)
+      console.log('-----> ', user)
+      if (user) {
+        console.log(`-----> User (${userId}) already exist`)
+        throw Error(`User (${userId}) already exist`)
+      }
       const result = await userRepository.createUser(initUser)
       if (!result.acknowledged) {
         return new ServiceResponse(

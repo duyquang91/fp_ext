@@ -29,8 +29,11 @@ export const userRouter: Router = (() => {
 
   router.get(
     '/',
-    async (req: Request<unknown, unknown, unknown, { userId?: string; group?: string }>, res: Response) => {
-      const serviceResponse = await userService.findAll(req.query.userId, req.query.group)
+    async (
+      req: Request<unknown, unknown, unknown, { userId?: string; group?: string; shareWith?: string }>,
+      res: Response
+    ) => {
+      const serviceResponse = await userService.findAll(req.query.userId, req.query.group, req.query.shareWith)
       handleServiceResponse(serviceResponse, res)
     }
   )

@@ -8,10 +8,10 @@ export type User = z.infer<typeof UserSchema>
 export const UserSchema = z.object({
   name: z.string().min(1),
   userId: z.string(),
-  email: z.string().email(),
   authToken: z.string().min(0),
   cookie: z.string().min(0),
   group: z.string().min(1).optional(),
+  shareWith: z.string().array().optional(),
 })
 
 // Input Validation for 'GET users/:email' endpoint
@@ -25,9 +25,9 @@ export const GetUserRequestSchema = z.object({
 export type InitUser = z.infer<typeof InitUserSchema>
 export const InitUserSchema = z.object({
   name: z.string().min(1),
-  email: z.string().email(),
   cookie: z.string().min(1),
   group: z.string().min(1).optional(),
+  shareWith: z.string().array().optional(),
 })
 
 // Input Validation for 'POST users/update' endpoint
@@ -68,11 +68,11 @@ export function convert(initUser: InitUser): User {
       }
       return {
         name: initUser.name,
-        email: initUser.email,
         authToken: token,
         cookie: initUser.cookie,
         userId: jwt.user_id,
         group: initUser.group,
+        shareWith: initUser.shareWith,
       }
     } else {
       throw new Error('Token is missing from cookie')
